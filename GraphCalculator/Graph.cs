@@ -95,21 +95,28 @@ namespace GraphCalculator
                 float step = 0.1f;
                 for (float x = start; x <= end; x += step)
                 {
-                    // Thay thế biến x trong biểu thức thành giá trị x
-                    exp.Parameters["x"] = x;
-                    /* Chuyển kết quả về chuỗi vì trong thư viện NCalc sẽ trả về object(double) với biểu thức chưa sin()/cos/tan và object(float) với các biểu thức còn lại. Vì kiểu float không thể giữ nhiều chữ số hàng thập phân */
-                    string curY = exp.Evaluate().ToString(); 
+                    try {
+                        // Thay thế biến x trong biểu thức thành giá trị x
+                        exp.Parameters["x"] = x;
+                        /* Chuyển kết quả về chuỗi vì trong thư viện NCalc sẽ trả về object(double) với biểu thức chưa sin()/cos/tan và object(float) với các biểu thức còn lại. Vì kiểu float không thể giữ nhiều chữ số hàng thập phân */
+                        string curY = exp.Evaluate().ToString();
 
-                    exp.Parameters["x"] = x + step;
-                    string nextY = exp.Evaluate().ToString();
+                        exp.Parameters["x"] = x + step;
+                        string nextY = exp.Evaluate().ToString();
 
-                    // Đưa về vị trí chuẩn trong hệ quy chiếu oxy
-                    float x1 = rootPoint.X + x * magnification;
-                    float y1 = rootPoint.Y - float.Parse(curY)* magnification;
-                    float x2 = rootPoint.X + (x + step) * magnification;
-                    float y2 = rootPoint.Y - float.Parse(nextY) * magnification;
+                        // Đưa về vị trí chuẩn trong hệ quy chiếu oxy
+                        float x1 = rootPoint.X + x * magnification;
+                        float y1 = rootPoint.Y - float.Parse(curY) * magnification;
+                        float x2 = rootPoint.X + (x + step) * magnification;
+                        float y2 = rootPoint.Y - float.Parse(nextY) * magnification;
 
-                    gP.AddLine(x1, y1, x2, y2);
+                        gP.AddLine(x1, y1, x2, y2);
+                    }
+                    catch (ArgumentException)
+                    {
+                        MessageBox.Show("Hãy kiểm tra lại hàm số");
+                        return;
+                    }
                 }
 
                 // Tạo một bitmap để vẽ lên rồi sau đó chuyển lên form -> giảm giật

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Collections;
+using System.Text.RegularExpressions;
 
 
 namespace GraphCalculator
@@ -37,10 +38,34 @@ namespace GraphCalculator
         }
         private string normalizeExpString(string expString)
         {
-            expString = expString.Replace("sin", "Sin");
-            expString = expString.Replace("cos", "Cos");
-            expString = expString.Replace("tan", "Tan");
-            expString = expString.Replace("cot", "Cot");
+
+            expString = Regex.Replace(expString, @"(?:sin|cos|tan)|(\d+)([a-zA-Z]+)", match =>
+            {
+                // Nếu match là một chuỗi "sin", "cos" hoặc "tan", thì chuyển thành viết hoa chữ đầu
+                if (match.Value == "sin" || match.Value == "cos" || match.Value == "tan")
+                {
+                    return match.Value.Substring(0, 1).ToUpper() + match.Value.Substring(1, match.Value.Length - 1);
+                }
+                else
+                {
+                    // Nếu match là một số và một ký tự liền kề, thì thay thế thành số*ký tự
+                    string temp = match.Groups[0].Value[0].ToString();
+                    for (int i = 1; i < match.Groups[0].Value.Length; i++)
+                    {
+                        temp += "*" + match.Groups[0].Value[i];
+                    }
+                    return temp;
+                }
+            });
+            expString = Regex.Replace(expString, @"cot\((.*?)\)", match =>
+            {
+                string x = match.Groups[1].Value; // Lấy giá trị của x trong chuỗi "cot(x)"
+                return $"Cos({x})/Sin({x})";      // Thay thế "cot(x)" thành "Cos(x)/Sin(x)"
+            });
+            expString = Regex.Replace(expString, @"[a-zA-Z]+", match =>
+             {
+                 return "x";
+             });
 
             return expString;
         }
@@ -48,7 +73,7 @@ namespace GraphCalculator
         {
             graph.clearPanel();
             string expString = normalizeExpString(tbFx.Text);
-
+            tbFx.Text = expString;
             if (expString != "")
                 graph.drawGraph(expString);
 
