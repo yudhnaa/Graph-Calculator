@@ -21,7 +21,7 @@ namespace GraphCalculator
         public Graph(Panel panelGrid)
         {
             this.grp = panelGrid.CreateGraphics();
-            this.magnification = 5;
+            this.magnification = 14;
             this.cellSize = 10 * magnification;
             //
             this.panelWidth = panelGrid.Width;
@@ -82,12 +82,26 @@ namespace GraphCalculator
         /// <param name="expString"></param>
         public void drawGraph(string expString)
         {
+            Bitmap bmp = new Bitmap(panelWidth, panelHeight);
+            Graphics temp = Graphics.FromImage(bmp);
+            temp.SmoothingMode = SmoothingMode.AntiAlias;
+
             using (Pen p = new Pen(Brushes.Black, 1))
             using (GraphicsPath gP = new GraphicsPath())
             {
                 // Đồ thị sẽ được vẽ từ x = start -> end
-                float start = -((panelWidth/magnification/2)-3);
-                float end = -start;
+                float start;
+                float end;
+                if (expString.Contains("Log"))
+                {
+                    start = 0.1f;
+                    end = ((panelWidth / magnification / 2) - 3);
+                }
+                else {
+                    start = -((panelWidth / magnification / 2) - 3);
+                    end = -start;
+                }
+                
 
                
                 // Dùng thư viện Ncalc để chuyển chuỗi thành một biểu thức
@@ -104,13 +118,28 @@ namespace GraphCalculator
                         exp.Parameters["x"] = x + step;
                         string nextY = exp.Evaluate().ToString();
 
+                        // Nếu với x không thể tính ra được kết quả
+                        if (curY == "NaN" || nextY == "NaN")
+                        {
+                            continue;
+                        }
+            
                         // Đưa về vị trí chuẩn trong hệ quy chiếu oxy
                         float x1 = rootPoint.X + x * magnification;
                         float y1 = rootPoint.Y - float.Parse(curY) * magnification;
                         float x2 = rootPoint.X + (x + step) * magnification;
                         float y2 = rootPoint.Y - float.Parse(nextY) * magnification;
 
-                        gP.AddLine(x1, y1, x2, y2);
+                        // Với hàm log(2,x) hoặc log(x,2) thì sẽ không liên tục nên phải tách ra để tránh sai xót
+                        if (y1 < 0 && y2 > 0 || y1 > 0 && y2 < 0)
+                        {
+                            temp.DrawPath(p, gP);
+                            gP.Reset();
+                        }
+                        else
+                            gP.AddLine(x1, y1, x2, y2);
+                        
+                        
                     }
                     catch (ArgumentException)
                     {
@@ -120,13 +149,8 @@ namespace GraphCalculator
                 }
 
                 // Tạo một bitmap để vẽ lên rồi sau đó chuyển lên form -> giảm giật
-                Bitmap bmp = new Bitmap(panelWidth, panelHeight);
-                using (Graphics temp = Graphics.FromImage(bmp))
-                {
-                    temp.SmoothingMode = SmoothingMode.AntiAlias;
-                    temp.DrawPath(p, gP);
-                }
-                grp.DrawPath(p, gP);
+                temp.DrawPath(p, gP);
+                grp.DrawImage(bmp, 0, 0);
             }
         }
 
