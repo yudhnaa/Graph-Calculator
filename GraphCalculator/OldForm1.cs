@@ -110,8 +110,7 @@ namespace GraphCalculator
 
         private void trackBarZoom_Scroll(object sender, EventArgs e)
         {
-            graph.Magnification = trackBarZoom.Value;
-            drawwww();
+            
         }
     }
 }
