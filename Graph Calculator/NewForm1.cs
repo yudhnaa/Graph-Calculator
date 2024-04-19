@@ -27,6 +27,7 @@ namespace Graph_Calculator
         private void formMain_Load(object sender, EventArgs e)
         {
             grid = new Grid(panelGrid);
+            grid.Magnification = 20;
             graphs = new List<Graph>();
             trackBarZoom.SetRange(1, 20);
             trackBarZoom.Value = (int) grid.Magnification;
@@ -128,6 +129,11 @@ namespace Graph_Calculator
             tableLayouPaneltExp.Controls.Add(tbFn, 1, tableLayouPaneltExp.RowCount++);
 
 
+        }
+        // Vẽ lại đồ thị khi minimize -> restore
+        private void formMain_Resize(object sender, EventArgs e)
+        {
+            showGraph();
         }
     }
 }
