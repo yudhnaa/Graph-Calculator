@@ -13,7 +13,6 @@ namespace Graph_Calculator
     class Graph
     {
         Bitmap originBmp;
-        Bitmap scaleBmp;
         string expString;
         Grid grid;
         
@@ -28,9 +27,10 @@ namespace Graph_Calculator
         {
             originBmp = new Bitmap(grid.Width, grid.Height);
             Graphics temp = Graphics.FromImage(originBmp);
-            temp.SmoothingMode = SmoothingMode.AntiAlias;
+            temp.SmoothingMode = SmoothingMode.HighSpeed;
 
-            using (Pen p = new Pen(Brushes.Black, 1))
+            Pen p = new Pen(Brushes.Black, 1);
+
             using (GraphicsPath gP = new GraphicsPath())
             {
                 // Đồ thị sẽ được vẽ từ x = start -> end
@@ -87,18 +87,24 @@ namespace Graph_Calculator
                     catch (ArgumentException)
                     {
                         MessageBox.Show("Hãy kiểm tra lại phương trình");
-                        temp.Clear(Color.White);
                         return;
                     }
                     catch (EvaluationException)
                     {
                         MessageBox.Show("Hãy kiểm tra lại phương trình");
-                        temp.Clear(Color.White);
                         return;
                     }
 
-                // Tạo một bitmap để vẽ lên rồi sau đó chuyển lên form -> giảm giật
-                temp.DrawPath(p, gP);
+                    // Tạo một bitmap để vẽ lên rồi sau đó chuyển lên form -> giảm giật
+                    try
+                    {
+                        temp.DrawPath(p, gP);
+                    }
+                    catch (OverflowException)
+                    {
+                        //MessageBox.Show("Hiện tại chưa thể xử lý được phương trình này. Hãy thử phóng to và thử lại!");
+                        return;
+                    }
             }
         }
         }
@@ -116,18 +122,6 @@ namespace Graph_Calculator
             }
         }
 
-        public Bitmap ScaleBmp
-        {
-            get
-            {
-                return scaleBmp;
-            }
-
-            set
-            {
-                scaleBmp = value;
-            }
-        }
 
         public string ExpString
         {

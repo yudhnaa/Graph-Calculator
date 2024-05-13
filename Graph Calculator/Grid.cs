@@ -20,6 +20,7 @@ namespace Graph_Calculator
         public Grid(Panel panel)
         {
             graphic = panel.CreateGraphics();
+            graphic.SmoothingMode = SmoothingMode.HighSpeed;
             width = panel.Width;
             height = panel.Height;
             magnification = 5;
